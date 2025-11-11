@@ -1,0 +1,44 @@
+﻿@page
+@model Filmatch.Pages.ResultModel
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (Model.MatchedFilms?.Any() == true)
+{
+    <div class="alert alert-success">
+        <h3>🎉 Совпадение!</h3>
+        <p>Вы оба лайкнули:</p>
+        <ul>
+            @foreach (var film in Model.MatchedFilms)
+            {
+                <li><strong>@film.Title</strong> (@film.Year)</li>
+            }
+        </ul>
+        <p><strong>Предлагаем посмотреть:</strong> <em>@Model.MatchedFilms.First().Title</em></p>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <h3>😕 Совпадений нет</h3>
+        @if (Model.FallbackFilm != null)
+        {
+            <p>Но хотя бы один из вас лайкнул: <strong>@Model.FallbackFilm.Title</strong></p>
+        }
+        else
+        {
+            <p>Никто ничего не лайкнул 😢</p>
+        }
+    </div>
+}
+
+<div class="mt-4">
+    <form method="post" asp-page="/Swiping" asp-page-handler="Reset">
+        <input type="hidden" name="user1" value="@Request.Query["user1"]" />
+        <input type="hidden" name="user2" value="@Request.Query["user2"]" />
+        <input type="hidden" name="userId" value="@Request.Query["user1"]" /> <!-- Default to first user -->
+        <button type="submit" class="btn btn-primary">Начать заново</button>
+    </form>
+</div>

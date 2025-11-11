@@ -1,0 +1,48 @@
+﻿@page
+@model Filmatch.Pages.SwipingModel
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (Model.CurrentFilm != null)
+{
+    <div class="card card-film shadow">
+        <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+                <h3 class="card-title">@Model.CurrentFilm.Title</h3>
+                <p class="text-muted">@Model.CurrentFilm.Year · @Model.CurrentFilm.Genre</p>
+            </div>
+            <div class="text-center">
+                <p class="text-secondary">Свайпните ❤️ или ❌</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <form method="post" asp-page-handler="Swipe">
+            <input type="hidden" name="filmId" value="@Model.CurrentFilm.Id" />
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <input type="hidden" name="liked" value="true" />
+            <input type="hidden" name="swipeCount" value="@Model.SwipeCount" />
+            <button type="submit" class="btn btn-success btn-swatch">❤️</button>
+        </form>
+
+        <form method="post" asp-page-handler="Swipe">
+            <input type="hidden" name="filmId" value="@Model.CurrentFilm.Id" />
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <input type="hidden" name="liked" value="false" />
+            <input type="hidden" name="swipeCount" value="@Model.SwipeCount" />
+            <button type="submit" class="btn btn-outline-secondary btn-swatch">❌</button>
+        </form>
+    </div>
+
+    <div class="text-center mt-3">
+        <small>Свайпов: @Model.SwipeCount / 10</small>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Фильмы закончились. <a asp-page="/Result" asp-route-user1="@Model.User1" asp-route-user2="@Model.User2">Посмотреть результат</a></div>
+}
