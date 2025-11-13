@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();                     // ← для Razor Pages
-builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FilmMatcherDb;Trusted_Connection=true;"));
 
@@ -43,12 +43,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseStaticFiles();
+app.UseRouting();
 app.UseAuthorization();
+app.MapControllerRoute(
+	name: "default",
+	pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapControllers();
-
-
 app.MapRazorPages();
-app.MapControllers();
 
 
 app.Run();
