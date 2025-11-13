@@ -43,4 +43,4 @@ cd filmmatcher
 
 dotnet ef database update --project Filmatch
 
-dotnet run --project src/YourProjectName.csproj
+dotnet run --project .\Filmatch\
