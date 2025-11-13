@@ -56,7 +56,7 @@ namespace Filmatch.Controllers
             {
                 Users = new { user1, user2 },
                 MatchedFilms = films,
-                SelectedFilm = films.FirstOrDefault();
+                SelectedFilm = films.FirstOrDefault()
             });
         }
     }
