@@ -5,7 +5,7 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();                     // ← для Razor Pages
+builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FilmMatcherDb;Trusted_Connection=true;"));
 
@@ -23,7 +23,6 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// В Program.cs после app.Build(), перед app.Run():
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -69,12 +68,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.MapControllers();
 app.MapRazorPages();
-
 
 app.Run();
