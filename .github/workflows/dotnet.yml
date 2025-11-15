@@ -26,9 +26,10 @@ jobs:
         - name: Build application
           run: dotnet build --no-restore
 
-        - name: Add new migration
-          run: dotnet ef migrations add CiMigration --project Filmatch --output-dir Migrations
-          continue-on-error: true
+        - name: Remove SQL Server migrations and create SQLite migration
+          run: |
+            rm -rf Filmatch/Migrations
+            dotnet ef migrations add InitialCreate --project Filmatch --output-dir Migrations
 
         - name: Run migrations with SQLite
           run: dotnet ef database update --project Filmatch 
