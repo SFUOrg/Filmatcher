@@ -26,8 +26,12 @@ jobs:
         - name: Build application
           run: dotnet build --no-restore
 
+        - name: Add new migration
+          run: dotnet ef migrations add CiMigration --project Filmatch --output-dir Migrations
+          continue-on-error: true
+
         - name: Run migrations with SQLite
-          run: dotnet ef database update --project Filmatch --force
+          run: dotnet ef database update --project Filmatch 
 
         - name: Formatting
           run: dotnet format --verify-no-changes
