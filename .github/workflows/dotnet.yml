@@ -28,8 +28,6 @@ jobs:
 
         - name: Run migrations with SQLite
           run: dotnet ef database update --project Filmatch
-          env:
-            ConnectionStrings__DefaultConnection: "Data Source=filmatch.db"
 
         - name: Formatting
           run: dotnet format --verify-no-changes
