@@ -24,10 +24,6 @@ jobs:
         - name: Build application
           run: dotnet build --no-restore
 
-        - name: Create application database
-          run: | 
-            sqlcmd -S localhost -U sa -P "trade787!" -Q "CREATE DATABASE MyApplicationDB"
-
         - name: Run database migrations
           run: dotnet ef database update --project Filmatch
 
