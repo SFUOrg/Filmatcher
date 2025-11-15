@@ -27,8 +27,10 @@ jobs:
         - name: Build application
           run: dotnet build --no-restore
 
-        - name: Run database migrations
+        - name: Run database migrations with SQLite
           run: dotnet ef database update --project Filmatch
+          env:
+            ConnectionStrings__DefaultConnection: "Data Source=filmatch.db"
 
         - name: Formatting
           run: dotnet format --verify-no-changes  
