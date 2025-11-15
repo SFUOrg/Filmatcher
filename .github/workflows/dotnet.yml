@@ -13,13 +13,13 @@ jobs:
             mssql:
                 image: mcr.microsoft.com/mssql/server:2022-latest
                 env:
-                    SA_PASSWORD: "trade787!"
+                    SA_PASSWORD: "Trade787!StrongPassword"
                     ACCEPT_EULA: "Y"
                     MSSQL_PID: "Express"
                 ports:
                     - 1433:1433
                 options: >-
-                    --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'trade787!' -Q 'SELECT 1' || exit 1"
+                    --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Trade787!StrongPassword' -Q 'SELECT 1' || exit 1"
                     --health-interval=10s
                     --health-timeout=5s
                     --health-retries=3
@@ -37,7 +37,7 @@ jobs:
         - name: Wait for SQL Server
           run:  |
             for i in {1..30}; do
-              if /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "trade787!" -Q "SELECT 1" > /dev/null 2>&1; then
+              if /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Trade787!StrongPassword" -Q "SELECT 1" > /dev/null 2>&1; then
                 echo "SQL Server is ready"
                 break
               else
@@ -64,7 +64,7 @@ jobs:
         - name: Run database migrations
           run: dotnet ef database update --project Filmatch
           env: 
-            ConnectionStrings_DefaultConnection: Server=localhost;Database=MyApplicationDB;User Id=sa;Password=trade787!;TrustServerCertificate=true;"
+            ConnectionStrings_DefaultConnection: Server=localhost;Database=MyApplicationDB;UserId=sa;Password=Trade787!StrongPassword;TrustServerCertificate=true;"
 
         - name: Formatting
           run: dotnet format --verify-no-changes  
