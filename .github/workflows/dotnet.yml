@@ -18,6 +18,9 @@ jobs:
           with:
               dotnet-version: '8.0.x'
 
+        - name: Install EF Core Tools
+          run: dotnet tool install --global dotnet-ef
+
         - name: Restore dependencies
           run: dotnet restore
 
@@ -26,8 +29,6 @@ jobs:
 
         - name: Run database migrations
           run: dotnet ef database update --project Filmatch
-          env:
-            DOTNET_ROOT: ${{ env.DOTNET_INSTALL_DIR }}
 
         - name: Formatting
           run: dotnet format --verify-no-changes  
