@@ -27,7 +27,7 @@ jobs:
           run: dotnet build --no-restore
 
         - name: Run migrations with SQLite
-          run: dotnet ef database update --project Filmatch
+          run: dotnet ef database update --project Filmatch --force
 
         - name: Formatting
           run: dotnet format --verify-no-changes
