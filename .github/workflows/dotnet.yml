@@ -17,6 +17,9 @@ jobs:
           with:
               dotnet-version: '8.0.x'
 
+        - name: Install EF Core Tools
+          run: dotnet tool install --global dotnet-ef --version 9.0.11
+
         - name: Restore dependencies
           run: dotnet restore
 
