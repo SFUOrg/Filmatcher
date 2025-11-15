@@ -35,4 +35,4 @@ jobs:
           run: dotnet ef database update --project Filmatch 
 
         - name: Formatting
-          run: dotnet format --verify-no-changes
+          run: dotnet format --verify-no-changes  --verbosity diagnostic
