@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddRazorPages();                     // ← для Razor Pages
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
