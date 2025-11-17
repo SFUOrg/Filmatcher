@@ -1,12 +1,16 @@
-﻿using Filmatch.Models;
+﻿using Filmatch.HealthChecks;
+using Filmatch.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();                     // ← для Razor Pages
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FilmMatcherDb;Trusted_Connection=true;"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString(nameof(AppDbContext))));
+builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database-health-check")
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" });
 
 var app = builder.Build();
 
@@ -51,6 +55,7 @@ app.MapControllerRoute(
 
 app.MapControllers();
 app.MapRazorPages();
+app.MapHealthChecks("/healtz");
 
 
 app.Run();
