@@ -33,6 +33,8 @@ builder.Services.AddSwaggerGen(options =>
 	{
 		options.IncludeXmlComments(xmlPath);
 	}
+	
+	
 });
 builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database-health-check")
 	.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" });
