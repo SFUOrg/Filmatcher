@@ -1,4 +1,5 @@
 ﻿using Filmatch.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Filmatch.Controllers
@@ -25,6 +26,7 @@ namespace Filmatch.Controllers
         /// <response code="200">Успешно возвращён случайный фильм</response>
         /// <response code="404">Фильмы не найдены в базе</response>
         [HttpGet("random")]
+        [Authorize]
         [ProducesResponseType(typeof(Film), 200)]
         [ProducesResponseType(404)]
         public IActionResult GetRandomFilm()
@@ -48,6 +50,7 @@ namespace Filmatch.Controllers
         /// <response code="200">Свайп успешно обработан</response>
         /// <response code="400">Некорректные данные запроса</response>
         [HttpPost("swipe")]
+        [Authorize]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         public IActionResult Swipe([FromBody] SwipeRequest request)
