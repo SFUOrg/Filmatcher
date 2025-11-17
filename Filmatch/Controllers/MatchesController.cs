@@ -14,13 +14,24 @@ namespace Filmatch.Controllers
             _context = context;
         }
 
-        // GET: api/matches?user1=alice&user2=bob
+        /// <summary>
+        /// Возвращает фильмы, которые понравились обоим пользователям.
+        /// Если общих лайков нет — возвращает один случайный фильм из тех, что лайкал хотя бы один.
+        /// </summary>
+        /// <param name="user1">ID первого пользователя</param>
+        /// <param name="user2">ID второго пользователя</param>
+        /// <returns>
+        /// Объект с пользователями, списком совпадающих фильмов и выбранным фильмом.
+        /// </returns>
+        /// <response code="200">Успешно возвращены данные</response>
+        /// <response code="400">Отсутствуют user1 или user2</response>
         [HttpGet]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public IActionResult GetMatch(string user1, string user2)
         {
             if (string.IsNullOrWhiteSpace(user1) || string.IsNullOrWhiteSpace(user2))
-                return BadRequest("User IDs required");
-
+                return BadRequest("User IDs required.");
 
             var mutualLikes = _context.Swipes
                 .Where(s1 => s1.UserId == user1 && s1.Liked)
