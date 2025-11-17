@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using Filmatch.ModelsConfiguration;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Filmatch.Models
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -14,8 +16,8 @@ namespace Filmatch.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-            // Всё по умолчанию — студенты добавят позже
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
