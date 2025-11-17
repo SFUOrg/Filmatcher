@@ -5,6 +5,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
 using Filmatch.Configurations.Authorization;
 using Filmatch.Configurations.Identity;
+using Filmatch.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -33,8 +34,6 @@ builder.Services.AddSwaggerGen(options =>
 	{
 		options.IncludeXmlComments(xmlPath);
 	}
-	
-	
 });
 builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database-health-check")
 	.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" });
@@ -75,6 +74,7 @@ using (var scope = app.Services.CreateScope())
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+app.UseMiddleware<SwaggerAuthMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
