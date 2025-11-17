@@ -1,6 +1,10 @@
 ﻿using Filmatch.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Filmatch.Configurations.Authorization;
+using Filmatch.Configurations.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +12,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();                     // ← для Razor Pages
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FilmMatcherDb;Trusted_Connection=true;"));
+
+builder.Services.ConfigureIdentity(builder.Configuration)
+    .ConfigureAuthorization(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
