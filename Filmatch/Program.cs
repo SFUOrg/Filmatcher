@@ -1,5 +1,7 @@
-﻿using Filmatch.Models;
+﻿using Filmatch.HealthChecks;
+using Filmatch.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
 using Filmatch.Configurations.Authorization;
 using Filmatch.Configurations.Identity;
@@ -9,13 +11,12 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages();                     // ← для Razor Pages
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
 	var useSqlite = builder.Configuration.GetValue<bool>("UseSqlite");
 	if (useSqlite) options.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnection"));
 	else options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-
 });
 
 builder.Services.ConfigureIdentity(builder.Configuration)
@@ -32,6 +33,8 @@ builder.Services.AddSwaggerGen(options =>
 		options.IncludeXmlComments(xmlPath);
 	}
 });
+builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database-health-check")
+	.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" });
 
 var app = builder.Build();
 
@@ -82,5 +85,6 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 app.MapRazorPages();
+app.MapHealthChecks("/healtz");
 
 app.Run();
