@@ -1,4 +1,5 @@
 ﻿using Filmatch.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Filmatch.Controllers
@@ -26,6 +27,7 @@ namespace Filmatch.Controllers
         /// <response code="200">Успешно возвращены данные</response>
         /// <response code="400">Отсутствуют user1 или user2</response>
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         public IActionResult GetMatch(string user1, string user2)
