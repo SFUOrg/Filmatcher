@@ -10,7 +10,7 @@ public class DatabaseHealthCheck : IHealthCheck
 
     public DatabaseHealthCheck(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString(nameof(AppDbContext)) ??
+        _connectionString = configuration.GetConnectionString("DefaultConnection") ??
                             throw new Exception("Connection string not found");
     }
 
