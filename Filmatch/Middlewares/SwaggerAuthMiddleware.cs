@@ -1,3 +1,5 @@
+using Filmatch.Models;
+
 namespace Filmatch.Middleware;
 
 public class SwaggerAuthMiddleware
@@ -13,7 +15,7 @@ public class SwaggerAuthMiddleware
     {
         if (context.Request.Path.StartsWithSegments("/swagger"))
         {
-            if (!context.User.IsInRole("Admin"))
+            if (!context.User.IsInRole(nameof(RoleEnum.Admin)))
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 return;
