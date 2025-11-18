@@ -1,8 +1,8 @@
-﻿using Filmatch.Models;
+﻿using Filmatch.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Filmatch.ModelsConfiguration;
+namespace Filmatch.Infrastructure.ModelsConfiguration;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {

@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filmatch", "Filmatch\Filmat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filmatch.Tests", "Filmatch.Tests\Filmatch.Tests.csproj", "{FC4DFAB6-B563-4EAD-8A24-4066EA710743}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filmatch.Infrastructure", "Filmatch.Infrastructure\Filmatch.Infrastructure.csproj", "{FC6967AF-FC86-4788-A5DB-8707ED7A2911}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filmatch.Domain", "Filmatch.Domain\Filmatch.Domain.csproj", "{2FA3EC76-2C9F-4062-9BA3-5016C8AAC8ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{FC4DFAB6-B563-4EAD-8A24-4066EA710743}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC4DFAB6-B563-4EAD-8A24-4066EA710743}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC4DFAB6-B563-4EAD-8A24-4066EA710743}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC6967AF-FC86-4788-A5DB-8707ED7A2911}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC6967AF-FC86-4788-A5DB-8707ED7A2911}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC6967AF-FC86-4788-A5DB-8707ED7A2911}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC6967AF-FC86-4788-A5DB-8707ED7A2911}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FA3EC76-2C9F-4062-9BA3-5016C8AAC8ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FA3EC76-2C9F-4062-9BA3-5016C8AAC8ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FA3EC76-2C9F-4062-9BA3-5016C8AAC8ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FA3EC76-2C9F-4062-9BA3-5016C8AAC8ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

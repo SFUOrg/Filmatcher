@@ -1,4 +1,5 @@
-﻿using Filmatch.Models;
+﻿using Filmatch.Domain.Models;
+using Filmatch.Infrastructure;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 

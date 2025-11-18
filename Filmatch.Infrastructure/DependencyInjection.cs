@@ -1,0 +1,33 @@
+﻿using Filmatch.Infrastructure.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Filmatch.Infrastructure;
+public static class DependencyInjection
+{
+	public static IServiceCollection AddInfrastructure(
+		this IServiceCollection services,
+		IConfiguration configuration,
+		bool isSQLite)
+	{
+
+		if (isSQLite)
+		{
+			var connectionString = configuration.GetConnectionString("SqliteConnection");
+			services.AddDbContext<AppDbContext>(options =>
+				options.UseSqlite(connectionString));
+		}
+		else
+		{
+			var connectionString = configuration.GetConnectionString("DefaultConnection");
+			services.AddDbContext<AppDbContext>(options =>
+						options.UseSqlServer(connectionString));
+		}
+
+		services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+
+		return services;
+	}
+}

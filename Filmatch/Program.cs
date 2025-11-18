@@ -1,27 +1,19 @@
-﻿using Filmatch.HealthChecks;
-using Filmatch.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Filmatch.Configurations.Authorization;
+using Filmatch.Configurations.Identity;
+using Filmatch.Domain.Models;
+using Filmatch.HealthChecks;
+using Filmatch.Infrastructure;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
-using Filmatch.Configurations.Authorization;
-using Filmatch.Configurations.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddRazorPages();                     // ← для Razor Pages
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-	var useSqlite = builder.Configuration.GetValue<bool>("UseSqlite");
-	if (useSqlite) options.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnection"));
-	else options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
+builder.Services.AddInfrastructure(builder.Configuration, builder.Configuration.GetValue("UseSqlite", true));
 builder.Services.ConfigureIdentity(builder.Configuration)
-    .ConfigureAuthorization(builder.Configuration);
+	.ConfigureAuthorization(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

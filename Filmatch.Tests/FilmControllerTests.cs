@@ -1,155 +1,177 @@
 ﻿using Filmatch.Controllers;
-using Filmatch.Models;
+using Filmatch.Domain.Models;
+using Filmatch.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Moq;
+using Match = Filmatch.Domain.Models.Match;
 
 namespace Filmatch.Tests;
 
 public class FilmControllerTests
 {
-	private static AppDbContext CreateTestContext() => new(new DbContextOptionsBuilder<AppDbContext>()
-			.UseInMemoryDatabase(databaseName: "Test_ExistingFilmContext").Options);
-	
-	[Fact]
-	public async Task FilmService_GetRandomFilm_ReturnsFilm()
+	private readonly Mock<IRepository<Film>> _filmMock;
+	private readonly Mock<IRepository<Swipe>> _swipeMock;
+	private readonly Mock<IRepository<Match>> _matchMock;
+
+	public FilmControllerTests()
 	{
-		using var context = CreateTestContext();
-		var controller = new FilmsController(context);
-
-		var filmsToAdd = new List<Film>()
-		{
-			new() { Title = "Inception", Year = 2010 },
-			new() { Title = "Begining", Year = 2015 },
-			new() { Title = "After", Year = 2011 }
-		};
-
-		await context.AddRangeAsync(filmsToAdd);
-		await context.SaveChangesAsync();
-
-		var result = controller.GetRandomFilm();
-
-		var okResult = result as OkObjectResult;
-		var film = okResult?.Value as Film;
-
-		Assert.Multiple(() =>
-		{
-			Assert.IsType<OkObjectResult>(result);
-			Assert.NotNull(film);
-			Assert.Contains(film.Title, filmsToAdd.Select(f => f.Title));
-		});
+		_filmMock = new Mock<IRepository<Film>>();
+		_swipeMock = new Mock<IRepository<Swipe>>();
+		_matchMock = new Mock<IRepository<Match>>();
 	}
 
 	[Fact]
-	public async Task FilmService_GetRandomFilm_ReturnsNotFound()
+	public async Task GetRandomFilm_ReturnsFilm_WhenFilmsExist()
 	{
-		using var context = CreateTestContext();
-		var controller = new FilmsController(context);
+		// Arrange
+		var films = new List<Film>
+		{
+			new() { Id = 1, Title = "Inception", Year = 2010 },
+			new() { Id = 2, Title = "Beginning", Year = 2015 },
+			new() { Id = 3, Title = "After", Year = 2011 }
+		};
 
-		context.Films.RemoveRange(context.Films);
-		await context.SaveChangesAsync();
+		_filmMock.Setup(x => x.GetAll())
+				.ReturnsAsync(films);
 
-		var result = controller.GetRandomFilm();
+		var controller = new FilmsController(_filmMock.Object, _swipeMock.Object, _matchMock.Object);
 
+		// Act
+		var result = await controller.GetRandomFilm();
+
+		// Assert
+		var okResult = Assert.IsType<OkObjectResult>(result);
+		var film = Assert.IsType<Film>(okResult.Value);
+		Assert.Contains(film, films);
+	}
+
+	[Fact]
+	public async Task GetRandomFilm_ReturnsNotFound_WhenNoFilms()
+	{
+		// Arrange
+		_filmMock.Setup(x => x.GetAll())
+				.ReturnsAsync(new List<Film>());
+
+		var controller = new FilmsController(_filmMock.Object, _swipeMock.Object, _matchMock.Object);
+
+		// Act
+		var result = await controller.GetRandomFilm();
+
+		// Assert
 		Assert.IsType<NotFoundResult>(result);
 	}
 
 	[Fact]
-	public async Task SwipeService_RecordSwipe_CreatesMatch_WhenBothLiked()
+	public async Task Swipe_CreatesMatch_WhenBothUsersLikedSameFilm()
 	{
-		using var dbContext = CreateTestContext();
-		var controller = new FilmsController(dbContext);
+		// Arrange
+		var filmId = 1;
+		var user1 = "user1";
+		var user2 = "user2";
 
-		var filmToAdd = new Film() { Title = "Inception", Year = 2010 };
+		var swipes = new List<Swipe>();
 
-		await dbContext.AddAsync(filmToAdd);
-		await dbContext.SaveChangesAsync();
+		_swipeMock.Setup(x => x.CreateAsync(It.IsAny<Swipe>()))
+				 .Callback<Swipe>(s => swipes.Add(s))
+				 .Returns(Task.CompletedTask);
 
-		var filmToGet = dbContext.Films.Where(f => f.Title == filmToAdd.Title).First();
+		_swipeMock.Setup(x => x.GetAll())
+				 .ReturnsAsync(swipes);
 
-		var req1 = new SwipeRequest() { UserId = "user1", FilmId = filmToGet.Id, Liked = true };
-		var req2 = new SwipeRequest() { UserId = "user2", FilmId = filmToGet.Id, Liked = true };
+		_matchMock.Setup(x => x.CreateAsync(It.IsAny<Match>()))
+				 .Returns(Task.CompletedTask);
 
-		controller.Swipe(req1);
-		var result = controller.Swipe(req2);
+		var controller = new FilmsController(_filmMock.Object, _swipeMock.Object, _matchMock.Object);
 
-		var r = result as OkObjectResult;
-		var valueType = r.Value.GetType();
-		var successProperty = valueType.GetProperty("success");
-		var successValue = (bool)successProperty.GetValue(r.Value);
+		var req1 = new SwipeRequest { UserId = user1, FilmId = filmId, Liked = true };
+		var req2 = new SwipeRequest { UserId = user2, FilmId = filmId, Liked = true };
 
-		var matches = dbContext.Matches.ToList();
+		// Act
+		await controller.Swipe(req1);
+		var result = await controller.Swipe(req2);
 
-		Assert.Multiple(() =>
-		{
-			Assert.IsType<OkObjectResult>(result);
-			Assert.True(successValue);
-			Assert.Single(matches);
-			Assert.Equal(filmToGet.Id, matches.First().FilmId);
-		});
+		// Assert
+		var okResult = Assert.IsType<OkObjectResult>(result);
+		Assert.NotNull(okResult.Value);
+
+		_matchMock.Verify(x => x.CreateAsync(It.Is<Match>(m =>
+			m.FilmId == filmId &&
+			m.User1Id == user1 &&
+			m.User2Id == user2)), Times.Once);
 	}
 
 	[Fact]
-	public void SwipeService_RecordSwipe_InvalidRequest_ReturnBadRequest()
+	public async Task Swipe_ReturnsBadRequest_WhenInvalidRequest()
 	{
-		using var dbContext = CreateTestContext();
-		var controller = new FilmsController(dbContext);
+		// Arrange
+		var controller = new FilmsController(_filmMock.Object, _swipeMock.Object, _matchMock.Object);
 
-		var invalidReq1 = new SwipeRequest() { UserId = "user1", FilmId = -100, Liked = true };
-		var invalidReq2 = new SwipeRequest() { FilmId = -100, Liked = true };
-
-		var result1 = controller.Swipe(invalidReq1);
-		var mes1 = result1 as BadRequestObjectResult;
-
-		var result2 = controller.Swipe(invalidReq2);
-		var mes2 = result2 as BadRequestObjectResult;
-
-		Assert.Multiple(() =>
+		var invalidRequests = new[]
 		{
-			Assert.IsType<BadRequestObjectResult>(result1);
-			Assert.Equal("Invalid request data.", mes1.Value);
-			Assert.IsType<BadRequestObjectResult>(result2);
-			Assert.Equal("Invalid request data.", mes2.Value);
-		});
+			new SwipeRequest { UserId = "", FilmId = 1, Liked = true }, // Empty UserId
+            new SwipeRequest { UserId = "user1", FilmId = 0, Liked = true }, // Invalid FilmId
+            new SwipeRequest { UserId = null, FilmId = 1, Liked = true } // Null UserId
+        };
+
+		foreach (var invalidRequest in invalidRequests)
+		{
+			// Act
+			var result = await controller.Swipe(invalidRequest);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid request data.", badRequestResult.Value);
+		}
 	}
 
 	[Fact]
-	public async Task SwipeService_RecordSwipe_NoMatchCreated_WhenOnlyOneUserLiked()
+	public async Task Swipe_NoMatchCreated_WhenOnlyOneUserLiked()
 	{
-		using var dbContext = CreateTestContext();
+		// Arrange
+		var filmId = 1;
+		var swipes = new List<Swipe>();
 
-		var film = new Film() { Title = "Inception", Year = 2010 };
+		_swipeMock.Setup(x => x.CreateAsync(It.IsAny<Swipe>()))
+				 .Callback<Swipe>(s => swipes.Add(s))
+				 .Returns(Task.CompletedTask);
 
-		await dbContext.Films.AddAsync(film);
-		await dbContext.SaveChangesAsync();
+		_swipeMock.Setup(x => x.GetAll())
+				 .ReturnsAsync(swipes);
 
-		var filmFromDb = dbContext.Films.First(f => f.Title == film.Title);
-		var req1 = new SwipeRequest() { UserId = "user1", FilmId = filmFromDb.Id, Liked = true };
-		var req2 = new SwipeRequest() { UserId = "user2", FilmId = filmFromDb.Id, Liked = false };
+		var controller = new FilmsController(_filmMock.Object, _swipeMock.Object, _matchMock.Object);
 
-		var controller = new FilmsController(dbContext);
+		var likeRequest = new SwipeRequest { UserId = "user1", FilmId = filmId, Liked = true };
+		var dislikeRequest = new SwipeRequest { UserId = "user2", FilmId = filmId, Liked = false };
 
-		var result1 = controller.Swipe(req1);
-		var result2 = controller.Swipe(req2);
+		// Act
+		await controller.Swipe(likeRequest);
+		await controller.Swipe(dislikeRequest);
 
-		var okResult1 = result1 as OkObjectResult;
-		var okResult2 = result2 as OkObjectResult;
+		// Assert
+		_matchMock.Verify(x => x.CreateAsync(It.IsAny<Match>()), Times.Never);
+	}
 
-		var valueType1 = okResult1.Value.GetType();
-		var valueType2 = okResult2.Value.GetType();
+	[Fact]
+	public async Task Swipe_ReturnsSuccess_WhenSwipeRecorded()
+	{
+		// Arrange
+		var swipeRequest = new SwipeRequest { UserId = "user1", FilmId = 1, Liked = true };
 
-		var successProperty1 = valueType1.GetProperty("success");
-		var successProperty2 = valueType2.GetProperty("success");
+		_swipeMock.Setup(x => x.CreateAsync(It.IsAny<Swipe>()))
+				 .Returns(Task.CompletedTask);
 
-		var successValue1 = (bool)successProperty1.GetValue(okResult1.Value);
-		var successValue2 = (bool)successProperty2.GetValue(okResult2.Value);
+		var controller = new FilmsController(_filmMock.Object, _swipeMock.Object, _matchMock.Object);
 
-		Assert.Multiple(() =>
-		{
-			Assert.IsType<OkObjectResult>(result1);
-			Assert.IsType<OkObjectResult>(result2);
-			Assert.True(successValue1);
-			Assert.True(successValue2);
-			Assert.Empty(dbContext.Matches);
-		});
+		// Act
+		var result = await controller.Swipe(swipeRequest);
+
+		// Assert
+		var okResult = Assert.IsType<OkObjectResult>(result);
+		Assert.NotNull(okResult.Value);
+
+		_swipeMock.Verify(x => x.CreateAsync(It.Is<Swipe>(s =>
+			s.UserId == swipeRequest.UserId &&
+			s.FilmId == swipeRequest.FilmId &&
+			s.Liked == swipeRequest.Liked)), Times.Once);
 	}
 }
