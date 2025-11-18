@@ -1,0 +1,44 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Вход";
+}
+
+<div class="auth-layout">
+    <div class="auth-card">
+        <h1 class="auth-title">Вход</h1>
+        <p class="auth-subtitle">Введите email и пароль, чтобы войти в систему.</p>
+
+        <form method="post" class="auth-form">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger auth-validation-summary"></div>
+
+            <div class="auth-field">
+                <label asp-for="Input.Email" class="auth-label"></label>
+                <input asp-for="Input.Email" class="auth-input" />
+                <span asp-validation-for="Input.Email" class="text-danger auth-validation-message"></span>
+            </div>
+
+            <div class="auth-field">
+                <label asp-for="Input.Password" class="auth-label"></label>
+                <input asp-for="Input.Password" class="auth-input" />
+                <span asp-validation-for="Input.Password" class="text-danger auth-validation-message"></span>
+            </div>
+
+            <div class="auth-field auth-remember">
+                <input asp-for="Input.RememberMe" class="auth-checkbox" />
+                <label asp-for="Input.RememberMe" class="auth-checkbox-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-button">
+                Войти
+            </button>
+
+            <p class="auth-switch">
+                Нет аккаунта?
+                <a asp-page="/Auth/Register">Зарегистрироваться</a>
+            </p>
+        </form>
+    </div>
+</div>

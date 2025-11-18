@@ -11,7 +11,7 @@ public static class IdentityConfiguration
     public static IServiceCollection ConfigureIdentity(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddIdentity<IdentityUser, IdentityRole>()
+        services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
         
