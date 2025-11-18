@@ -27,7 +27,7 @@ namespace Filmatch.Controllers
         /// <response code="200">Успешно возвращены данные</response>
         /// <response code="400">Отсутствуют user1 или user2</response>
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = nameof(RoleEnum.User))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         public IActionResult GetMatch(string user1, string user2)

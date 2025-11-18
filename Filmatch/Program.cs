@@ -6,6 +6,12 @@ using Filmatch.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
+using Filmatch;
+using Filmatch.Configurations.Authorization;
+using Filmatch.Configurations.Identity;
+using Filmatch.Middleware;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +89,13 @@ using (var scope = app.Services.CreateScope())
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+app.UseMiddleware<SwaggerAuthMiddleware>();
+
+using (var scope = app.Services.CreateScope())
+{
+	var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+	await RoleInitializer.InitializeAsync(roleManager);
+}
 
 
 if (app.Environment.IsDevelopment())
