@@ -1,12 +1,11 @@
-﻿using Filmatch.HealthChecks;
+﻿using Filmatch.Configurations.Authorization;
+using Filmatch.Configurations.Identity;
+using Filmatch.HealthChecks;
+using Filmatch.Middlwares;
 using Filmatch.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
-using Filmatch.Configurations.Authorization;
-using Filmatch.Configurations.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.ConfigureIdentity(builder.Configuration)
-    .ConfigureAuthorization(builder.Configuration);
+	.ConfigureAuthorization(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -36,6 +35,17 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database-health-check")
 	.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" });
+
+builder.Services.AddExceptionHandler<FilmatchExceptionHandler>();
+builder.Services.AddProblemDetails(options =>
+{
+	options.CustomizeProblemDetails = ctx =>
+	{
+		ctx.ProblemDetails.Extensions.Add("nodeId", Environment.MachineName);
+		ctx.ProblemDetails.Extensions.Add("instance", $"{ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path}");
+	};
+});
+
 
 var app = builder.Build();
 
@@ -74,8 +84,11 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
+
 if (app.Environment.IsDevelopment())
 {
+	app.UseExceptionHandler("/Error");
+	app.UseStatusCodePages();
 	app.UseSwagger();
 	app.UseSwaggerUI(options =>
 	{
